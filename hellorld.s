@@ -92,14 +92,24 @@ endl:
 	jmp do_line
 
 exit:
+	; Convert SUM to BCD
 	jsr htd
-	lda HTD_OUT
-	sta OUT
-	lda HTD_OUT+1
-	sta OUT
+
+	; Print the BCD sum as a 5-digit decimal number
 	lda HTD_OUT+2
+	jsr print_1dig
+	lda HTD_OUT+1
+	jsr print_2dig
+	lda HTD_OUT
+	jsr print_2dig
+
+	lda #NEWLINE
 	sta OUT
+
+halt:
 	brk
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 next_ch:
 	pha
@@ -159,6 +169,26 @@ htd1:	dex             ; By taking X in steps of 3, we don't have to
 	cld
 	rts
 
+print_2dig:
+	pha
+
+	and #$F0
+	ror
+	ror
+	ror
+	ror
+	clc
+	adc #'0'
+	sta OUT
+
+	pla
+print_1dig:
+	and #$0F
+	clc
+	adc #'0'
+	sta OUT
+
+	rts
 
 data: .incbin "input"
 	.byte 0
