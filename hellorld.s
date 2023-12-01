@@ -80,5 +80,5 @@ next_ch:
 	pla
 	rts
 
-data: .incbin "simple"
+data: .incbin "input"
 	.byte 0
