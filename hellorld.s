@@ -54,13 +54,16 @@ do_digit:
 	jmp backout
 
 endl:
+	; ASC to binary
 	lda FIRST_DIG
-	sta OUT
-	lda #' '
+	sec
+	sbc #'0'
+	sta FIRST_DIG
 	sta OUT
 	lda LAST_DIG
-	sta OUT
-	lda #NEWLINE
+	sec
+	sbc #'0'
+	sta LAST_DIG
 	sta OUT
 	jsr next_ch
 	jmp do_line
