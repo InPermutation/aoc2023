@@ -55,20 +55,45 @@ do_digit:
 
 endl:
 	; ASC to binary
-	lda FIRST_DIG
-	sec
-	sbc #'0'
-	sta FIRST_DIG
-	sta OUT
 	lda LAST_DIG
 	sec
 	sbc #'0'
 	sta LAST_DIG
-	sta OUT
+	lda FIRST_DIG
+	sec
+	sbc #'0'
+	sta FIRST_DIG
+
+	; 10x FIRST_DIG
+	clc
+	adc FIRST_DIG
+	adc FIRST_DIG
+	adc FIRST_DIG
+	adc FIRST_DIG
+	adc FIRST_DIG
+	adc FIRST_DIG
+	adc FIRST_DIG
+	adc FIRST_DIG
+	adc FIRST_DIG
+	; +1x LAST_DIG
+	adc LAST_DIG
+
+	; Add to SUM
+	clc
+	adc SUM
+	sta SUM
+	lda #0
+	adc SUM+1
+	sta SUM+1
+
 	jsr next_ch
 	jmp do_line
 
 exit:
+	lda SUM
+	sta OUT
+	lda SUM+1
+	sta OUT
 	brk
 
 next_ch:
