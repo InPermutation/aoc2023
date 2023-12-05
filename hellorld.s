@@ -1,51 +1,46 @@
-.org $200
-.segment "STARTUP"
-.segment "INIT"
-.segment "ONCE"
 .segment "CODE"
 
 ; Constants
 NEWLINE = $0A
+EOF = $FF
 
 ; Addresses
-PTR = $10
 FIRST_DIG = $12
 LAST_DIG = $13
 SUM = $14
 HTD_IN = SUM
 HTD_OUT = $16
-OUT = $F000
+HALT = $FFF9
 
-init:
+.import _putchar
+.import _getchar
+
+.proc _main
 	cli
 	cld
 	ldx #$ff
 	txs
 
-	ldy #0 ; Y must remain 0 at all times for indirect addressing
-	; We can also use it to zero-out (SUM)
+	ldy #0
 	sty SUM
 	sty SUM+1
-
-	lda #<(data)
-	sta PTR
-	lda #>(data)
-	sta PTR+1
-
 do_line:
 	lda #NEWLINE
 	sta FIRST_DIG
-	lda (PTR),Y
+	jsr _getchar
+	cmp #EOF
 	beq exit
+	jmp chknl
 do_ch:
-	lda (PTR),Y
+	jsr _getchar
+	cmp #EOF
 	beq endl
+chknl:
 	cmp #NEWLINE
 	beq endl
 	cmp #'9' + 1
 	bmi do_digit
 backout:
-	jsr next_ch
 	jmp do_ch
 do_digit:
 	sta LAST_DIG
@@ -88,7 +83,6 @@ endl:
 	adc SUM+1
 	sta SUM+1
 
-	jsr next_ch
 	jmp do_line
 
 exit:
@@ -104,24 +98,13 @@ exit:
 	jsr print_2dig
 
 	lda #NEWLINE
-	sta OUT
+	jsr _putchar
 
 halt:
-	brk
+	lda #0
+	jmp HALT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-next_ch:
-	pha
-	lda PTR
-	clc
-	adc #1
-	sta PTR
-	lda PTR+1
-	adc #0
-	sta PTR+1
-	pla
-	rts
 
 ; From http://www.6502.org/source/integers/hex2dec.htm
 ; (which is why it uses __H suffix syntax)
@@ -130,15 +113,16 @@ TABLE:	.byte    0, 0H, 1H,  0, 0H, 2H,  0, 0H, 4H,  0, 0H, 8H
 	.byte    0, 2H,56H,  0, 5H,12H,  0,10H,24H,  0,20H,48H
 	.byte    0,40H,96H,  0,81H,92H,  1,63H,84H,  3,27H,68H
 htd:
-	; Zero HTD_OUT
-	sty HTD_OUT
-	sty HTD_OUT+1
-	sty HTD_OUT+2
-
 	; Save registers A and X
 	pha
 	txa
 	pha
+
+	; Zero HTD_OUT
+	ldx #0
+	stx HTD_OUT
+	stx HTD_OUT+1
+	stx HTD_OUT+2
 
 	ldx #15 + 15 + 15 ; 3x15 bits.
 	sed
@@ -172,6 +156,7 @@ htd1:	dex             ; By taking X in steps of 3, we don't have to
 print_2dig:
 	pha
 
+	clc
 	and #$F0
 	ror
 	ror
@@ -179,16 +164,16 @@ print_2dig:
 	ror
 	clc
 	adc #'0'
-	sta OUT
+	jsr _putchar
 
 	pla
 print_1dig:
 	and #$0F
 	clc
 	adc #'0'
-	sta OUT
+	jsr _putchar
 
 	rts
 
-data: .incbin "input"
-	.byte 0
+.endproc
+.export _main
