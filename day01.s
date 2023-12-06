@@ -15,6 +15,9 @@ HALT := $FFF9
 .import _putchar
 .import _getchar
 
+.import print_1dig
+.import print_2dig
+
 .proc _main
 	cli
 	cld
@@ -151,28 +154,5 @@ htd:
 	pla
 	cld
 	rts
-
-print_2dig:
-	pha
-
-	clc
-	and #$F0
-	ror
-	ror
-	ror
-	ror
-	clc
-	adc #'0'
-	jsr _putchar
-
-	pla
-print_1dig:
-	and #$0F
-	clc
-	adc #'0'
-	jsr _putchar
-
-	rts
-
 .endproc
 .export _main
