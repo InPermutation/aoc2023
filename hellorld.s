@@ -26,31 +26,31 @@ do_line:
 	sta FIRST_DIG
 	jsr _getchar
 	cmp #EOF
-	beq exit
-	bne chknl
-do_ch:
+	beq @exit
+	bne @chknl
+@do_ch:
 	jsr _getchar
 	cmp #EOF
-	beq endl
-chknl:
+	beq @endl
+@chknl:
 	cmp #NEWLINE
-	beq endl
+	beq @endl
 	cmp #'9' + 1
-	bmi do_digit
+	bmi @do_digit
 	; assumes #':' never appears in the input:
-	bne do_ch
-do_digit:
+	bne @do_ch
+@do_digit:
 	; always update LAST_DIG
 	sta LAST_DIG
 	ldx FIRST_DIG
 	cpx #NEWLINE
 	; if FIRST_DIG is already set: try next ch
-	bne do_ch
+	bne @do_ch
 	; else: set FIRST_DIG before trying next ch
 	sta FIRST_DIG
-	beq do_ch
+	beq @do_ch
 
-endl:
+@endl:
 	; ASC to binary
 	lda LAST_DIG
 	sec
@@ -85,7 +85,7 @@ endl:
 
 	jmp do_line
 
-exit:
+@exit:
 	; Convert SUM to BCD
 	jsr htd
 
@@ -100,7 +100,6 @@ exit:
 	lda #NEWLINE
 	jsr _putchar
 
-halt:
 	lda #0
 	jmp HALT
 
@@ -126,10 +125,10 @@ htd:
 
 	ldx #15 + 15 + 15 ; 3x15 bits.
 	sed
-htd_loop:
+@loop:
 	asl HTD_IN      ; (0 to 15 is 16 bit positions.)
 	rol HTD_IN+1    ; If the next highest bit was 0,
-	bcc htd1       ; then skip to the next bit after that.
+	bcc @htd1       ; then skip to the next bit after that.
 	lda HTD_OUT     ; But if the bit was 1,
 	clc             ; get ready to
 	adc TABLE+2,X   ; add the bit value in the table to the
@@ -141,10 +140,10 @@ htd_loop:
 	adc TABLE,X     ; storing each byte
 	sta HTD_OUT+2   ; of the summed output in HTD_OUT.
 
-htd1:	dex             ; By taking X in steps of 3, we don't have to
+@htd1:	dex             ; By taking X in steps of 3, we don't have to
 	dex             ; multiply by 3 to get the right bytes from the
 	dex             ; table.
-	bpl htd_loop
+	bpl @loop
 
 	; Restore registers A and X
 	pla
