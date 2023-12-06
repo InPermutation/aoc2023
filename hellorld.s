@@ -10,7 +10,7 @@ LAST_DIG = $13
 SUM = $14
 HTD_IN = SUM
 HTD_OUT = $16
-HALT = $FFF9
+HALT := $FFF9
 
 .import _putchar
 .import _getchar
