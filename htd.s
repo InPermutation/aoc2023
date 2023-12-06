@@ -10,8 +10,8 @@ TABLE:	.byte    0, 0H, 1H,  0, 0H, 2H,  0, 0H, 4H,  0, 0H, 8H
 	.byte    0,40H,96H,  0,81H,92H,  1,63H,84H,  3,27H,68H
 
 .ZEROPAGE
-HTD_IN  := $14
-HTD_OUT := $16
+HTD_IN: .res 2
+HTD_OUT: .res 3
 
 .CODE
 htd:

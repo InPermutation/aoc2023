@@ -4,8 +4,8 @@ EOF = $FF
 
 .ZEROPAGE
 ; Addresses
-FIRST_DIG = $12
-LAST_DIG = $13
+FIRST_DIG: .res 1
+LAST_DIG: .res 1
 .import HTD_IN, HTD_OUT
 SUM = HTD_IN
 HALT := $FFF9
