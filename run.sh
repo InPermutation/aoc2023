@@ -1,1 +1,1 @@
-sim65 hellorld
+sim65 ${1:-day01}

@@ -1,1 +1,2 @@
-cl65 --target sim6502 hellorld.s
+set -ex
+cl65 --target sim6502 ${1:-day01}.s
