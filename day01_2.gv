@@ -1,0 +1,36 @@
+digraph lexnum {
+//one, two, three, four, five, six, seven, eight, and nine
+	one_o -> one_n;
+	one_n -> eight_e [label=1];
+	one_n -> nine_i;
+
+	init_t -> two_w;
+	two_w -> one_o [label=2];
+
+	init_t -> three_h -> three_r -> three_e1;
+	three_e1 -> eight_e [label=3];
+	three_e1 -> eight_i;
+
+	init_f -> four_o -> four_u;
+	four_u -> four_r [label=4];
+	four_o -> one_n;
+
+	init_f -> five_i -> five_v;
+	five_v -> eight_e [label=5];
+
+	init_s -> six_i;
+	six_i -> six_x [label=6];
+	init_s -> seven_e1 -> seven_v -> seven_e2;
+	seven_e2 -> seven_n [label=7];
+	seven_e1 -> eight_i;
+	seven_e2 -> eight_i;
+	seven_n -> nine_i;
+
+	eight_e -> eight_i -> eight_g -> eight_h;
+	eight_h -> eight_t [label=8];
+	eight_t -> two_w;
+	eight_t -> three_h;
+
+	nine_n1 -> nine_i -> nine_n2;
+	nine_n2 -> eight_e [label=9];
+}
