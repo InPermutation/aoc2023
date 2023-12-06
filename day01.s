@@ -17,7 +17,7 @@ HALT := $FFF9
 .import htd
 .import print_1dig, print_2dig
 
-.proc _main
+_main:
 	cli
 	cld
 	ldx #0
@@ -105,5 +105,4 @@ do_line:
 	lda #0
 	jmp HALT
 
-.endproc
 .export _main
