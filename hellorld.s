@@ -18,19 +18,16 @@ HALT = $FFF9
 .proc _main
 	cli
 	cld
-	ldx #$ff
-	txs
-
-	ldy #0
-	sty SUM
-	sty SUM+1
+	ldx #0
+	stx SUM
+	stx SUM+1
 do_line:
 	lda #NEWLINE
 	sta FIRST_DIG
 	jsr _getchar
 	cmp #EOF
 	beq exit
-	jmp chknl
+	bne chknl
 do_ch:
 	jsr _getchar
 	cmp #EOF
@@ -40,15 +37,18 @@ chknl:
 	beq endl
 	cmp #'9' + 1
 	bmi do_digit
-backout:
-	jmp do_ch
+	; assumes #':' never appears in the input:
+	bne do_ch
 do_digit:
+	; always update LAST_DIG
 	sta LAST_DIG
 	ldx FIRST_DIG
 	cpx #NEWLINE
-	bne backout
+	; if FIRST_DIG is already set: try next ch
+	bne do_ch
+	; else: set FIRST_DIG before trying next ch
 	sta FIRST_DIG
-	jmp backout
+	beq do_ch
 
 endl:
 	; ASC to binary
