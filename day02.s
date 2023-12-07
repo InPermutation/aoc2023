@@ -19,7 +19,8 @@ SHOW_BLUE: .res 1 ; the count of blues shown on this hand
 MAX_RED: .res 1
 MAX_GREEN: .res 1
 MAX_BLUE: .res 1
-TMP: .res 1 ; temp var
+TMP: .res 2 ; temp var
+POWER: .res 2 ; power of the current game
 
 HALT := $FFF9
 
@@ -62,9 +63,10 @@ next_game:
 @not_valid:
 	jsr max_power
 	clc
+	lda POWER
 	adc SUM_POS
 	sta SUM_POS
-	lda #0
+	lda POWER+1
 	adc SUM_POS+1
 	sta SUM_POS+1
 
@@ -79,7 +81,7 @@ exit:
 	lda SUM_POS
 	sta SUM
 	lda SUM_POS+1
-	sta SUM_POS+1
+	sta SUM+1
 	jsr print_5dig
 
 	lda #NEWLINE
@@ -242,7 +244,28 @@ unexpected:
 max_power: ; TODO
 	lda #0
 	rts
-update_maxes: ; TODO
+
+
+
+update_maxes:
+	pha
+
+	lda SHOW_RED
+	cmp MAX_RED
+	bmi @g
+	sta MAX_RED
+@g:
+	lda SHOW_GREEN
+	cmp MAX_GREEN
+	bmi @b
+	sta MAX_GREEN
+@b:
+	lda SHOW_BLUE
+	cmp MAX_BLUE
+	bmi @q
+	sta MAX_BLUE
+@q:
+	pla
 	rts
 
 .export _main
