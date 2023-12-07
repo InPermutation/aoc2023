@@ -10,11 +10,15 @@ BAG_BLUE = 14
 ; Addresses
 .import HTD_IN, HTD_OUT
 SUM := HTD_IN
+SUM_POS: .res 2
 GAME_NUM: .res 1 ; game ID number
 GAME_VALID: .res 1 ; 0 -> not valid, else -> valid
 SHOW_RED: .res 1 ; the count of reds shown on this hand
 SHOW_GREEN: .res 1 ; the count of green shown on this hand
 SHOW_BLUE: .res 1 ; the count of blues shown on this hand
+MAX_RED: .res 1
+MAX_GREEN: .res 1
+MAX_BLUE: .res 1
 TMP: .res 1 ; temp var
 
 HALT := $FFF9
@@ -31,6 +35,8 @@ _main:
 	ldx #0
 	stx SUM
 	stx SUM+1
+	stx SUM_POS
+	stx SUM_POS+1
 
 next_game:
 	jsr reset_game
@@ -38,8 +44,7 @@ next_game:
 @show_one:
 	jsr read_one_show
 	jsr check_one_show
-	pha
-	pla
+	jsr update_maxes
 	cmp #';'
 	beq @show_one
 @end_show:
@@ -53,12 +58,30 @@ next_game:
 	lda #0
 	adc SUM+1
 	sta SUM+1
+
 @not_valid:
+	jsr max_power
+	clc
+	adc SUM_POS
+	sta SUM_POS
+	lda #0
+	adc SUM_POS+1
+	sta SUM_POS+1
+
 	pla ; restore last-read char
 	cmp #EOF
 	bne next_game
 exit:
 	jsr print_5dig
+	lda #' '
+	jsr _putchar
+
+	lda SUM_POS
+	sta SUM
+	lda SUM_POS+1
+	sta SUM_POS+1
+	jsr print_5dig
+
 	lda #NEWLINE
 	jsr _putchar
 
@@ -73,6 +96,9 @@ reset_game:
 	sta SHOW_RED
 	sta SHOW_GREEN
 	sta SHOW_BLUE
+	sta MAX_RED
+	sta MAX_GREEN
+	sta MAX_BLUE
 	pla
 	rts
 
@@ -212,5 +238,11 @@ unexpected:
 	lda #'?'
 	jsr _putchar
 	jmp HALT
+
+max_power: ; TODO
+	lda #0
+	rts
+update_maxes: ; TODO
+	rts
 
 .export _main
