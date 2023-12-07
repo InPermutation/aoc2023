@@ -2,14 +2,14 @@
 NEWLINE = $0A
 EOF = $FF
 
-BAG_RED = 12
-BAG_GREEN = 13
-BAG_BLUE = 14
+BAG_RED = $12
+BAG_GREEN = $13
+BAG_BLUE = $14
 
 .ZEROPAGE
 ; Addresses
-.import HTD_IN, HTD_OUT
-SUM := HTD_IN
+; All of these are in BCD!!
+SUM: .res 3
 SUM_POS: .res 3
 GAME_NUM: .res 1 ; game ID number
 GAME_VALID: .res 1 ; 0 -> not valid, else -> valid
@@ -28,7 +28,7 @@ HALT := $FFF9
 .import _putchar
 .import _getchar
 
-.import print_5dig, print_hex
+.import print_hex
 
 _main:
 	cli
@@ -36,6 +36,7 @@ _main:
 	ldx #0
 	stx SUM
 	stx SUM+1
+	stx SUM+2
 	stx SUM_POS
 	stx SUM_POS+1
 	stx SUM_POS+2
@@ -54,16 +55,22 @@ next_game:
 	lda GAME_VALID
 	beq @not_valid
 	clc
+	sed
 	lda GAME_NUM
 	adc SUM
 	sta SUM
 	lda #0
 	adc SUM+1
 	sta SUM+1
+	lda #0
+	adc SUM+2
+	sta SUM+2
+	cld
 
 @not_valid:
 	jsr max_power
 	clc
+	sed
 	lda POWER
 	adc SUM_POS
 	sta SUM_POS
@@ -73,12 +80,19 @@ next_game:
 	lda #0
 	adc SUM_POS+2
 	sta SUM_POS+2
+	cld
 
 	pla ; restore last-read char
 	cmp #EOF
 	bne next_game
 exit:
-	jsr print_5dig
+	lda SUM+2
+	jsr print_hex
+	lda SUM+1
+	jsr print_hex
+	lda SUM
+	jsr print_hex
+
 	lda #' '
 	jsr _putchar
 
@@ -126,10 +140,6 @@ read_game_num:
 check_one_show:
 	pha
 
-	lda SHOW_RED
-	lda SHOW_GREEN
-	lda SHOW_BLUE
-
 	lda #BAG_RED
 	cmp SHOW_RED
 	bmi @not_valid
@@ -163,29 +173,18 @@ read_decimal:
 	bpl @done
 
 	; Convert ASCII to decimal
-	sec
-	sbc #'0'
-
-	; Set aside next ones column:
-	pha
+	and #$0F
 
 	; Multiply existing TMP by 10
-	clc
-	lda TMP
-	adc TMP
-	adc TMP
-	adc TMP
-	adc TMP
-	adc TMP
-	adc TMP
-	adc TMP
-	adc TMP
-	adc TMP
-	sta TMP
+	asl TMP
+	asl TMP
+	asl TMP
+	asl TMP
 	; Add A back in
-	pla
 	clc
+	sed
 	adc TMP
+	cld
 	sta TMP
 	; Check next char
 	jmp @loop
@@ -256,7 +255,9 @@ max_power:
 	sta POWER
 
 	; ASSUMPTION: power is never 0 (there's always red, green, and blue at least once in each game)
+	; ASSUMPTION: power is always <=6859 (19*19*19) so fits in 2 bytes
 	ldx MAX_GREEN
+	sed
 @loopg:
 	clc
 	lda MAX_RED
@@ -268,11 +269,16 @@ max_power:
 	sta POWER+1
 	sta TMP+1
 
-	dex
+	txa
+	sec
+	sbc #1
+	tax
 	bne @loopg
 
-	ldx MAX_BLUE
-	dex
+	lda MAX_BLUE
+	sec
+	sbc #1
+	tax
 	beq @done
 @loopb:
 	lda TMP
@@ -283,30 +289,13 @@ max_power:
 	adc POWER+1
 	sta POWER+1
 
-	dex
+	txa
+	sec
+	sbc #1
+	tax
 	bne @loopb
 @done:
-
-;	DEBUG
-	lda SUM
-	pha
-	lda SUM+1
-	pha
-
-	lda POWER
-	sta SUM
-	lda POWER+1
-	sta SUM+1
-	jsr print_5dig
-	lda #NEWLINE
-	jsr _putchar
-
-	pla
-	sta SUM+1
-	pla
-	sta SUM
-;	/DEBUG
-
+	cld
 	pla
 	tax
 	pla
