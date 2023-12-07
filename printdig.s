@@ -1,6 +1,7 @@
 ; destroys A register
 .ZEROPAGE
 .import HTD_OUT
+HEXTMP: .res 1
 
 .CODE
 .import _putchar, htd
@@ -37,4 +38,32 @@ print_1dig:
 
 	rts
 
-.export print_1dig, print_2dig, print_5dig
+print_hex:
+	pha
+
+	and #$F0
+	clc
+	ror
+	ror
+	ror
+	ror
+	jsr print_hex1
+	pla
+	and #$0F
+	clc
+print_hex1:
+	sta HEXTMP
+	txa
+	pha
+	ldx HEXTMP
+	lda HEXDIGITS,X
+	jsr _putchar
+
+	pla
+	tax
+	rts
+
+HEXDIGITS: .byte "0123456789ABCDEF"
+
+
+.export print_1dig, print_2dig, print_5dig, print_hex

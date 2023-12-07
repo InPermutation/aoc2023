@@ -241,11 +241,71 @@ unexpected:
 	jsr _putchar
 	jmp HALT
 
-max_power: ; TODO
+max_power:
+	pha
+	txa
+	pha
+
 	lda #0
+	sta POWER+1
+	sta POWER
+
+	; ASSUMPTION: power is never 0 (there's always red, green, and blue at least once in each game)
+	ldx MAX_GREEN
+@loopg:
+	clc
+	lda MAX_RED
+	adc POWER
+	sta POWER
+	sta TMP
+	lda #0
+	adc POWER+1
+	sta POWER+1
+	sta TMP+1
+
+	dex
+	bne @loopg
+
+	ldx MAX_BLUE
+	dex
+	beq @done
+@loopb:
+	lda TMP
+	clc
+	adc POWER
+	sta POWER
+	lda TMP+1
+	adc POWER+1
+	sta POWER+1
+
+	dex
+	bne @loopb
+@done:
+
+;	DEBUG
+	lda SUM
+	pha
+	lda SUM+1
+	pha
+
+	lda POWER
+	sta SUM
+	lda POWER+1
+	sta SUM+1
+	jsr print_5dig
+	lda #NEWLINE
+	jsr _putchar
+
+	pla
+	sta SUM+1
+	pla
+	sta SUM
+;	/DEBUG
+
+	pla
+	tax
+	pla
 	rts
-
-
 
 update_maxes:
 	pha
