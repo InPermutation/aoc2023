@@ -1,5 +1,5 @@
 set -e
-DAY_NUM=${1:-01}
+DAY_NUM=${1:-02}
 DAY=day$DAY_NUM
 
 echo Assembling $DAY...
