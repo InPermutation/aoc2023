@@ -1,6 +1,20 @@
 ; destroys A register
-.import _putchar
+.ZEROPAGE
+.import HTD_OUT
 
+.CODE
+.import _putchar, htd
+
+print_5dig:
+	; Convert SUM to BCD
+	jsr htd
+
+	; Print the BCD sum as a 5-digit decimal number
+	lda HTD_OUT+2
+	jsr print_1dig
+	lda HTD_OUT+1
+	jsr print_2dig
+	lda HTD_OUT
 print_2dig:
 	pha
 
@@ -23,5 +37,4 @@ print_1dig:
 
 	rts
 
-.export print_1dig
-.export print_2dig
+.export print_1dig, print_2dig, print_5dig

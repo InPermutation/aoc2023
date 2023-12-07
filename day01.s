@@ -6,7 +6,7 @@ EOF = $FF
 ; Addresses
 FIRST_DIG: .res 1
 LAST_DIG: .res 1
-.import HTD_IN, HTD_OUT
+.import HTD_IN
 FSM: .res 2
 SUM = HTD_IN
 HALT := $FFF9
@@ -15,8 +15,7 @@ HALT := $FFF9
 .import _putchar
 .import _getchar
 
-.import htd
-.import print_1dig, print_2dig
+.import htd, print_5dig
 
 .macro chgstate addr
 	pha
@@ -130,16 +129,7 @@ endl:
 	jmp do_line
 
 exit:
-	; Convert SUM to BCD
-	jsr htd
-
-	; Print the BCD sum as a 5-digit decimal number
-	lda HTD_OUT+2
-	jsr print_1dig
-	lda HTD_OUT+1
-	jsr print_2dig
-	lda HTD_OUT
-	jsr print_2dig
+	jsr print_5dig
 
 	lda #NEWLINE
 	jsr _putchar
