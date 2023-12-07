@@ -10,7 +10,7 @@ BAG_BLUE = 14
 ; Addresses
 .import HTD_IN, HTD_OUT
 SUM := HTD_IN
-SUM_POS: .res 2
+SUM_POS: .res 3
 GAME_NUM: .res 1 ; game ID number
 GAME_VALID: .res 1 ; 0 -> not valid, else -> valid
 SHOW_RED: .res 1 ; the count of reds shown on this hand
@@ -28,7 +28,7 @@ HALT := $FFF9
 .import _putchar
 .import _getchar
 
-.import htd, print_1dig, print_2dig, print_5dig
+.import print_5dig, print_hex
 
 _main:
 	cli
@@ -38,6 +38,7 @@ _main:
 	stx SUM+1
 	stx SUM_POS
 	stx SUM_POS+1
+	stx SUM_POS+2
 
 next_game:
 	jsr reset_game
@@ -69,6 +70,9 @@ next_game:
 	lda POWER+1
 	adc SUM_POS+1
 	sta SUM_POS+1
+	lda #0
+	adc SUM_POS+2
+	sta SUM_POS+2
 
 	pla ; restore last-read char
 	cmp #EOF
@@ -78,11 +82,12 @@ exit:
 	lda #' '
 	jsr _putchar
 
-	lda SUM_POS
-	sta SUM
+	lda SUM_POS+2
+	jsr print_hex
 	lda SUM_POS+1
-	sta SUM+1
-	jsr print_5dig
+	jsr print_hex
+	lda SUM_POS
+	jsr print_hex
 
 	lda #NEWLINE
 	jsr _putchar
