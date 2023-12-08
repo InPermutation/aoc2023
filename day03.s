@@ -241,16 +241,51 @@ parse_num:
 	jsr is_digit
 	bne @ndig
 
-	; HI = X+1
+	; HI = X = last digit + 1
 	stx HI
-	inc HI
 	rts
 
 check_around_num:
-	; TODO: use NUM LO HI
+	ldy LO
+	lda CUR_ROW,Y
+	jsr is_symbol
+	bne @yes
+@loop:
+	lda LAST_ROW,Y
+	jsr is_symbol
+	bne @yes
+	lda NEXT_ROW,Y
+	jsr is_symbol
+	bne @yes
 
+	iny
+	cpy HI
+	bne @loop
+
+	;Y==HI
+	lda CUR_ROW,Y
+	jsr is_symbol
+	bne @yes
+	lda LAST_ROW,Y
+	jsr is_symbol
+	bne @yes
+	lda NEXT_ROW,Y
+	jsr is_symbol
+@yes:
+	rts
+
+is_symbol:
+	cmp #NEWLINE
+	beq @no
+	cmp #'.'
+	beq @no
+	jsr is_digit
+	bne @no
+@yes:
 	lda #1
-	cmp #0
+	rts
+@no:
+	lda #0
 	rts
 
 .export _main
