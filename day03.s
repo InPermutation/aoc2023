@@ -7,8 +7,8 @@ EOF = $FF
 ; All of these are in BCD!!
 ; Assumption: sum will fit in 6 digits (3 BCD bytes)
 SUM: .res 3
-; Assumption: TMP will fit in 4 digits (2 BCD bytes)
-TMP: .res 2
+; Assumption: NUM will fit in 4 digits (2 BCD bytes)
+NUM: .res 2
 LO: .res 1
 HI: .res 1
 IS_FINAL: .res 1
@@ -187,11 +187,11 @@ add_to_sum:
 	pha
 	sed
 
-	lda TMP
+	lda NUM
 	clc
 	adc SUM
 	sta SUM
-	lda TMP+1
+	lda NUM+1
 	adc SUM+1
 	sta SUM+1
 	lda #0
@@ -222,20 +222,20 @@ parse_num:
 	dec LO
 @clrtmp:
 	lda #0
-	sta TMP
-	sta TMP+1
+	sta NUM
+	sta NUM+1
 @ndig:
 
 	.repeat 4
-	asl TMP
-	rol TMP+1
+	asl NUM
+	rol NUM+1
 	.endrep
 
 	lda CUR_ROW,X
 	sec
 	sbc #'0'
-	ora TMP
-	sta TMP
+	ora NUM
+	sta NUM
 	inx
 	lda CUR_ROW,X
 	jsr is_digit
@@ -247,7 +247,8 @@ parse_num:
 	rts
 
 check_around_num:
-	; TODO: use TMP LO HI
+	; TODO: use NUM LO HI
+
 	lda #1
 	cmp #0
 	rts
