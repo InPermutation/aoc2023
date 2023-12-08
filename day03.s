@@ -215,11 +215,35 @@ is_digit:
 	rts
 
 parse_num:
+	; LO = MAX(0, X-1)
+	stx LO
+	cpx #0
+	beq @clrtmp
+	dec LO
+@clrtmp:
 	lda #0
-	sta TMP+1
-	lda #1
 	sta TMP
-	; TODO: write TMP LO HI
+	sta TMP+1
+@ndig:
+
+	.repeat 4
+	asl TMP
+	rol TMP+1
+	.endrep
+
+	lda CUR_ROW,X
+	sec
+	sbc #'0'
+	ora TMP
+	sta TMP
+	inx
+	lda CUR_ROW,X
+	jsr is_digit
+	bne @ndig
+
+	; HI = X+1
+	stx HI
+	inc HI
 	rts
 
 check_around_num:
