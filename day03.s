@@ -130,6 +130,7 @@ process_cur_row:
 
 	ldx #0
 @loop:
+	; TODO: something
 	lda CUR_ROW,X
 	cmp #NEWLINE
 	beq @endl
