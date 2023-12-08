@@ -9,6 +9,8 @@ EOF = $FF
 SUM: .res 3
 ; Assumption: TMP will fit in 4 digits (2 BCD bytes)
 TMP: .res 2
+LO: .res 1
+HI: .res 1
 IS_FINAL: .res 1
 CH: .res 1
 
@@ -130,15 +132,19 @@ process_cur_row:
 
 	ldx #0
 @loop:
-	; TODO: something
 	lda CUR_ROW,X
 	cmp #NEWLINE
 	beq @endl
-	jsr putchar
+	jsr is_digit
+	beq @next
+	jsr parse_num
+	jsr check_around_num
+	beq @next
+	jsr add_to_sum
+@next:
 	inx
 	bne @loop
 @endl:
-	jsr putchar
 	pla
 	tax
 	pla
@@ -175,6 +181,51 @@ putchar:
 	pla
 	tax
 	lda CH
+	rts
+
+add_to_sum:
+	pha
+	sed
+
+	lda TMP
+	clc
+	adc SUM
+	sta SUM
+	lda TMP+1
+	adc SUM+1
+	sta SUM+1
+	lda #0
+	adc SUM+2
+	sta SUM+2
+
+	cld
+	pla
+	rts
+
+is_digit:
+	cmp #'9'+1
+	bpl @no
+	cmp #'0'
+	bmi @no
+@yes:
+	lda #1
+	rts
+@no:
+	lda #0
+	rts
+
+parse_num:
+	lda #0
+	sta TMP+1
+	lda #1
+	sta TMP
+	; TODO: write TMP LO HI
+	rts
+
+check_around_num:
+	; TODO: use TMP LO HI
+	lda #1
+	cmp #0
 	rts
 
 .export _main
