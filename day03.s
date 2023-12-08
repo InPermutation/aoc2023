@@ -7,6 +7,8 @@ EOF = $FF
 ; All of these are in BCD!!
 ; Assumption: sum will fit in 6 digits (3 BCD bytes)
 SUM: .res 3
+RATIO: .res 3 ; 999*999 =  998,001, 6 digits.
+SUM_RATIO: .res 5 ; be careful of overflow i guess
 ; Assumption: NUM will fit in 4 digits (2 BCD bytes)
 NUM: .res 2
 LO: .res 1
@@ -30,9 +32,12 @@ _main:
 	cli
 	cld
 	ldx #0
-	stx SUM
-	stx SUM+1
-	stx SUM+2
+	.repeat (RATIO-SUM), I
+	stx SUM+I
+	.endrep
+	.repeat (NUM-SUM_RATIO), I
+	stx SUM_RATIO+I
+	.endrep
 	stx IS_FINAL
 	lda #'.'
 @init:
@@ -51,12 +56,18 @@ _main:
 	lda IS_FINAL
 	beq @loop
 exit:
-	lda SUM+2
+	.repeat (RATIO-SUM), I
+	lda SUM+(RATIO-SUM-I-1)
 	jsr print_hex
-	lda SUM+1
+	.endrep
+
+	lda #' '
+	jsr putchar
+
+	.repeat (NUM-SUM_RATIO), I
+	lda SUM_RATIO+(NUM-SUM_RATIO-I-1)
 	jsr print_hex
-	lda SUM
-	jsr print_hex
+	.endrep
 
 	lda #NEWLINE
 	jsr putchar
@@ -135,6 +146,11 @@ process_cur_row:
 	lda CUR_ROW,X
 	cmp #NEWLINE
 	beq @endl
+	cmp #'*'
+	bne @dig
+	jsr gear_ratio
+	jmp @next
+@dig:
 	jsr is_digit
 	beq @next
 	jsr parse_num
@@ -286,6 +302,9 @@ is_symbol:
 	rts
 @no:
 	lda #0
+	rts
+
+gear_ratio:
 	rts
 
 .export _main
